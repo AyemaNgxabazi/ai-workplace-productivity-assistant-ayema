@@ -10,6 +10,11 @@ export const getRouter = () => {
     context: { queryClient },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
+    defaultNotFoundComponent: () => (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-muted-foreground">Page not found</p>
+      </div>
+    ),
   });
 
   return router;
