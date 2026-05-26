@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -7,7 +7,9 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-
+import { useEffect } from "react";
+import { Toaster } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -72,14 +74,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Pulse — AI Workplace Productivity Assistant" },
+      {
+        name: "description",
+        content:
+          "Pulse is an AI workplace assistant that drafts emails, summarizes meetings, plans tasks, and researches topics for busy professionals.",
+      },
+      { property: "og:title", content: "Pulse — AI Workplace Productivity" },
+      {
+        property: "og:description",
+        content: "Draft, summarize, plan, research — your AI workplace co-pilot.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -113,7 +120,22 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthSync />
       <Outlet />
+      <Toaster richColors theme="dark" />
     </QueryClientProvider>
   );
+}
+
+function AuthSync() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      router.invalidate();
+      queryClient.invalidateQueries();
+    });
+    return () => subscription.unsubscribe();
+  }, [router, queryClient]);
+  return null;
 }
