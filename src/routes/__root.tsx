@@ -74,16 +74,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Pulse — AI Workplace Productivity Assistant" },
+      { title: "WorkSmart AI Assistant — AI Workplace Productivity" },
       {
         name: "description",
         content:
-          "Pulse is an AI workplace assistant that drafts emails, summarizes meetings, plans tasks, and researches topics for busy professionals.",
+          "WorkSmart AI Assistant drafts emails, summarizes meetings, plans tasks, and researches topics for busy professionals — with responsible AI guardrails.",
       },
-      { property: "og:title", content: "Pulse — AI Workplace Productivity" },
+      { property: "og:title", content: "WorkSmart AI Assistant" },
       {
         property: "og:description",
-        content: "Draft, summarize, plan, research — your AI workplace co-pilot.",
+        content: "Automate your workplace tasks with responsible AI support.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -122,7 +122,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthSync />
       <Outlet />
-      <Toaster richColors theme="dark" />
+      <Toaster richColors theme="light" />
     </QueryClientProvider>
   );
 }

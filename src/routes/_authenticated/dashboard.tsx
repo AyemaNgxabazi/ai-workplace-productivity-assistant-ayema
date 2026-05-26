@@ -1,44 +1,56 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
-import { Mail, FileText, ListChecks, Search, MessagesSquare, Sparkles, ArrowRight, AlertTriangle } from "lucide-react";
+import { Mail, FileText, ListChecks, Search, MessagesSquare, Sparkles, ArrowRight, AlertTriangle, MousePointerClick, Pencil, ClipboardCheck } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
 });
 
 const tools = [
-  { url: "/email", title: "Smart Email Generator", desc: "Draft polished emails in seconds with the right tone.", icon: Mail },
-  { url: "/meeting", title: "Meeting Notes Summarizer", desc: "Turn raw notes into decisions, actions, and next steps.", icon: FileText },
-  { url: "/tasks", title: "AI Task Planner", desc: "Break goals into prioritized, time-boxed plans.", icon: ListChecks },
-  { url: "/research", title: "AI Research Assistant", desc: "Structured briefings on any topic, fast.", icon: Search },
-  { url: "/chat", title: "AI Chatbot", desc: "Open-ended conversations with multi-thread memory.", icon: MessagesSquare },
+  { url: "/email", title: "Emails", desc: "Draft professional emails with subject, greeting, body and closing.", icon: Mail },
+  { url: "/meeting", title: "Meeting Notes", desc: "Summarize notes into actions, decisions, and follow-ups.", icon: FileText },
+  { url: "/tasks", title: "Task Planning", desc: "Turn goals into prioritized tasks with deadlines.", icon: ListChecks },
+  { url: "/research", title: "Research", desc: "Get structured briefings with key points and sources.", icon: Search },
+  { url: "/chat", title: "AI Chat", desc: "Open-ended conversations for any workplace question.", icon: MessagesSquare },
+];
+
+const steps = [
+  { icon: MousePointerClick, title: "Choose an AI tool", desc: "Pick from the sidebar — emails, meetings, tasks, research or chat." },
+  { icon: Pencil, title: "Enter your workplace information", desc: "Paste notes, describe the situation, or type your question." },
+  { icon: ClipboardCheck, title: "Review, edit and copy", desc: "Refine the AI output, then copy it into your workflow." },
 ];
 
 function Dashboard() {
   return (
     <div className="mx-auto w-full max-w-6xl p-6">
-      <div className="mb-8 flex flex-col gap-2">
-        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border/60 bg-card/50 px-3 py-1 text-xs text-muted-foreground">
-          <Sparkles className="h-3 w-3 text-primary" />
-          Welcome to Pulse
+      <section className="relative mb-10 overflow-hidden rounded-2xl border border-border/60 p-8 shadow-[var(--shadow-card)]"
+        style={{ backgroundImage: "var(--gradient-hero)" }}>
+        <div className="absolute inset-0 bg-[radial-gradient(60%_60%_at_100%_0%,rgba(255,255,255,0.25),transparent_60%)]" />
+        <div className="relative">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+            <Sparkles className="h-3 w-3" />
+            Welcome to WorkSmart AI Assistant
+          </div>
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
+            Automate your workplace tasks with responsible AI support.
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-white/85 md:text-base">
+            Draft, summarize, plan, research and chat — five focused tools, one clean workspace.
+          </p>
         </div>
-        <h1 className="text-3xl font-semibold tracking-tight">Your AI workplace, in one place</h1>
-        <p className="max-w-2xl text-muted-foreground">
-          Draft, summarize, plan, research, and chat — all powered by AI, designed for busy
-          professionals.
-        </p>
-      </div>
+      </section>
 
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">Tools</h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {tools.map((t) => (
           <Link key={t.url} to={t.url}>
-            <Card className="group h-full p-5 transition-all hover:border-primary/50 hover:shadow-[var(--shadow-glow)]">
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[var(--primary-glow)] text-primary-foreground">
+            <Card className="group h-full p-5 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-glow)]">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[var(--primary-glow)] text-primary-foreground shadow-sm">
                 <t.icon className="h-5 w-5" />
               </div>
               <h3 className="mb-1 font-semibold">{t.title}</h3>
               <p className="text-sm text-muted-foreground">{t.desc}</p>
-              <div className="mt-4 flex items-center gap-1 text-xs text-primary opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="mt-4 flex items-center gap-1 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
                 Open <ArrowRight className="h-3 w-3" />
               </div>
             </Card>
@@ -46,7 +58,23 @@ function Dashboard() {
         ))}
       </div>
 
-      <Card className="mt-8 flex items-start gap-3 border-amber-500/20 bg-amber-500/5 p-4">
+      <h2 className="mb-3 mt-10 text-sm font-semibold uppercase tracking-wider text-muted-foreground">How to use this app</h2>
+      <div className="grid gap-4 sm:grid-cols-3">
+        {steps.map((s, i) => (
+          <Card key={s.title} className="p-5">
+            <div className="mb-3 flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                {i + 1}
+              </div>
+              <s.icon className="h-4 w-4 text-primary" />
+            </div>
+            <h3 className="mb-1 font-semibold">{s.title}</h3>
+            <p className="text-sm text-muted-foreground">{s.desc}</p>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="mt-8 flex items-start gap-3 border-amber-500/30 bg-amber-50 p-4">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
         <div className="text-sm">
           <p className="font-medium text-foreground">Responsible AI</p>
