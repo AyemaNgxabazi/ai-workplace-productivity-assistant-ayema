@@ -62,7 +62,6 @@
 }
 
 :root {
-:root {
   --radius: 0.75rem;
   /* Midnight Indigo palette */
   --background: oklch(0.13 0.04 275);
