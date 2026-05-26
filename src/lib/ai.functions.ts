@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { generateText } from "ai";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createLovableAiGatewayProvider, DEFAULT_MODEL } from "./ai-gateway.server";
 
 const ToolKind = z.enum(["email", "meeting", "task", "research"]);
@@ -18,7 +17,6 @@ const SYSTEM_PROMPTS: Record<z.infer<typeof ToolKind>, string> = {
 };
 
 export const runAiTool = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
       .object({
@@ -42,42 +40,4 @@ export const runAiTool = createServerFn({ method: "POST" })
       prompt: userMsg,
     });
     return { text };
-  });
-
-const SavedKind = z.enum(["email", "meeting", "task", "research"]);
-
-export const saveOutput = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z
-      .object({
-        kind: SavedKind,
-        title: z.string().min(1).max(200),
-        content: z.string().min(1).max(20000),
-      })
-      .parse(input),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-    const { error } = await supabase.from("saved_outputs").insert({
-      user_id: userId,
-      kind: data.kind,
-      title: data.title,
-      content: data.content,
-    });
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
-
-export const listSavedOutputs = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { supabase } = context;
-    const { data, error } = await supabase
-      .from("saved_outputs")
-      .select("id,kind,title,content,created_at")
-      .order("created_at", { ascending: false })
-      .limit(50);
-    if (error) throw new Error(error.message);
-    return data ?? [];
   });
