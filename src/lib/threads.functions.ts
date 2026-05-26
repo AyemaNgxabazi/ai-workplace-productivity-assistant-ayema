@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export type StoredMessage = {
   id: string;
   role: "user" | "assistant" | "system";
-  parts: unknown;
+  parts: any;
 };
 
 export const listThreads = createServerFn({ method: "GET" })
@@ -76,6 +76,6 @@ export const getThreadMessages = createServerFn({ method: "POST" })
     return (rows ?? []).map((r) => ({
       id: r.id as string,
       role: r.role as StoredMessage["role"],
-      parts: r.parts as unknown,
+      parts: r.parts as any,
     })) as StoredMessage[];
   });
