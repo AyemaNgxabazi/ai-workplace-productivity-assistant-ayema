@@ -1,4 +1,4 @@
-import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Sidebar,
   SidebarContent,
@@ -18,11 +18,10 @@ import {
   ListChecks,
   Search,
   MessagesSquare,
-  LogOut,
+  LogIn,
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 
 const tools = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -35,12 +34,6 @@ const tools = [
 
 export function AppSidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const navigate = useNavigate();
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    navigate({ to: "/login" });
-  };
 
   return (
     <Sidebar collapsible="icon">
@@ -78,14 +71,11 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={signOut}
-          className="justify-start gap-2"
-        >
-          <LogOut className="h-4 w-4" />
-          <span className="group-data-[collapsible=icon]:hidden">Sign out</span>
+        <Button asChild variant="ghost" size="sm" className="justify-start gap-2">
+          <Link to="/login">
+            <LogIn className="h-4 w-4" />
+            <span className="group-data-[collapsible=icon]:hidden">Sign in (optional)</span>
+          </Link>
         </Button>
       </SidebarFooter>
     </Sidebar>

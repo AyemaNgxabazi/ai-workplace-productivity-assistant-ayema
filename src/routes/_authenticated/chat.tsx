@@ -1,16 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import {
-  listThreads,
-  createThread,
-  deleteThread,
-  getThreadMessages,
-} from "@/lib/threads.functions";
-import { supabase } from "@/integrations/supabase/client";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,67 +15,88 @@ export const Route = createFileRoute("/_authenticated/chat")({
   component: ChatPage,
 });
 
-function ChatPage() {
-  const qc = useQueryClient();
-  const list = useServerFn(listThreads);
-  const create = useServerFn(createThread);
-  const del = useServerFn(deleteThread);
-  const getMsgs = useServerFn(getThreadMessages);
+type Thread = { id: string; title: string; messages: UIMessage[] };
+const STORAGE_KEY = "pulse_chat_threads_v1";
 
+function loadThreads(): Thread[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveThreads(threads: Thread[]) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(threads));
+}
+
+function ChatPage() {
+  const [threads, setThreads] = useState<Thread[]>([]);
   const [threadId, setThreadId] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setToken(data.session?.access_token ?? null));
+    const t = loadThreads();
+    setThreads(t);
+    if (t.length) setThreadId(t[0].id);
+    setHydrated(true);
   }, []);
 
-  const threads = useQuery({
-    queryKey: ["threads"],
-    queryFn: () => list(),
-  });
+  useEffect(() => {
+    if (hydrated) saveThreads(threads);
+  }, [threads, hydrated]);
 
-  const initialMsgs = useQuery({
-    queryKey: ["thread-messages", threadId],
-    queryFn: () => (threadId ? getMsgs({ data: { threadId } }) : Promise.resolve([])),
-    enabled: !!threadId,
-  });
+  const current = threads.find((t) => t.id === threadId);
 
-  const newThread = useMutation({
-    mutationFn: () => create(),
-    onSuccess: (r) => {
-      setThreadId(r.id);
-      qc.invalidateQueries({ queryKey: ["threads"] });
-    },
-  });
+  const newThread = () => {
+    const t: Thread = {
+      id: crypto.randomUUID(),
+      title: "New conversation",
+      messages: [],
+    };
+    setThreads((prev) => [t, ...prev]);
+    setThreadId(t.id);
+  };
 
-  const removeThread = useMutation({
-    mutationFn: (id: string) => del({ data: { id } }),
-    onSuccess: (_d, id) => {
-      if (threadId === id) setThreadId(null);
-      qc.invalidateQueries({ queryKey: ["threads"] });
-    },
-  });
+  const removeThread = (id: string) => {
+    setThreads((prev) => prev.filter((t) => t.id !== id));
+    if (threadId === id) setThreadId(null);
+  };
+
+  const updateThread = (id: string, messages: UIMessage[]) => {
+    setThreads((prev) =>
+      prev.map((t) => {
+        if (t.id !== id) return t;
+        const firstUser = messages.find((m) => m.role === "user");
+        const firstText =
+          firstUser?.parts.find((p: any) => p.type === "text") as { text?: string } | undefined;
+        const title =
+          t.title === "New conversation" && firstText?.text
+            ? firstText.text.slice(0, 60)
+            : t.title;
+        return { ...t, title, messages };
+      }),
+    );
+  };
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)]">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-card/30 md:flex">
         <div className="p-3">
-          <Button
-            onClick={() => newThread.mutate()}
-            className="w-full gap-2"
-            disabled={newThread.isPending}
-          >
+          <Button onClick={newThread} className="w-full gap-2">
             <Plus className="h-4 w-4" /> New chat
           </Button>
         </div>
         <ScrollArea className="flex-1 px-2 pb-2">
-          {threads.data?.length === 0 && (
+          {threads.length === 0 && (
             <div className="px-2 py-4 text-center text-xs text-muted-foreground">
               No conversations yet
             </div>
           )}
           <div className="space-y-1">
-            {threads.data?.map((t) => (
+            {threads.map((t) => (
               <div
                 key={t.id}
                 className={cn(
@@ -100,7 +112,7 @@ function ChatPage() {
                 </button>
                 <button
                   className="opacity-0 transition-opacity group-hover:opacity-100"
-                  onClick={() => removeThread.mutate(t.id)}
+                  onClick={() => removeThread(t.id)}
                 >
                   <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
                 </button>
@@ -111,16 +123,15 @@ function ChatPage() {
       </aside>
 
       <div className="flex flex-1 flex-col">
-        {threadId && token ? (
+        {current ? (
           <ChatThread
-            key={threadId}
-            threadId={threadId}
-            token={token}
-            initialMessages={initialMsgs.data ?? []}
-            ready={!initialMsgs.isLoading}
+            key={current.id}
+            threadId={current.id}
+            initialMessages={current.messages}
+            onChange={(msgs) => updateThread(current.id, msgs)}
           />
         ) : (
-          <EmptyState onNew={() => newThread.mutate()} />
+          <EmptyState onNew={newThread} />
         )}
       </div>
     </div>
@@ -148,39 +159,30 @@ function EmptyState({ onNew }: { onNew: () => void }) {
 
 function ChatThread({
   threadId,
-  token,
   initialMessages,
-  ready,
+  onChange,
 }: {
   threadId: string;
-  token: string;
-  initialMessages: { id: string; role: string; parts: any }[];
-  ready: boolean;
+  initialMessages: UIMessage[];
+  onChange: (m: UIMessage[]) => void;
 }) {
   const [input, setInput] = useState("");
   const { messages, sendMessage, status } = useChat({
     id: threadId,
     messages: initialMessages as any,
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      headers: { Authorization: `Bearer ${token}` },
-      body: { threadId },
-    }),
+    transport: new DefaultChatTransport({ api: "/api/chat" }),
     onError: (e) => toast.error(e.message),
   });
+
+  useEffect(() => {
+    onChange(messages as UIMessage[]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
-
-  if (!ready) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();

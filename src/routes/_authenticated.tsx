@@ -1,6 +1,4 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { AlertTriangle } from "lucide-react";
@@ -10,36 +8,6 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 function AuthLayout() {
-  const navigate = useNavigate();
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) return;
-      if (!data.session) {
-        navigate({ to: "/login", replace: true });
-      } else {
-        setReady(true);
-      }
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (!session) navigate({ to: "/login", replace: true });
-    });
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
-
-  if (!ready) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Loading…
-      </div>
-    );
-  }
-
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">

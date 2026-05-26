@@ -6,9 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { runAiTool, saveOutput } from "@/lib/ai.functions";
+import { runAiTool } from "@/lib/ai.functions";
 import { toast } from "sonner";
-import { Sparkles, Copy, Save, AlertTriangle, Loader2 } from "lucide-react";
+import { Sparkles, Copy, AlertTriangle, Loader2 } from "lucide-react";
 
 type Kind = "email" | "meeting" | "task" | "research";
 
@@ -33,24 +33,10 @@ export function ToolWorkspace({
   const [tone, setTone] = useState("Professional");
   const [output, setOutput] = useState("");
   const run = useServerFn(runAiTool);
-  const save = useServerFn(saveOutput);
 
   const generate = useMutation({
     mutationFn: () => run({ data: { kind, input, tone: showTone ? tone : undefined } }),
     onSuccess: (res) => setOutput(res.text),
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const persist = useMutation({
-    mutationFn: () =>
-      save({
-        data: {
-          kind,
-          title: input.slice(0, 60) || title,
-          content: output,
-        },
-      }),
-    onSuccess: () => toast.success("Saved"),
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -118,14 +104,6 @@ export function ToolWorkspace({
             <div className="flex gap-1">
               <Button variant="ghost" size="sm" onClick={copy} disabled={!output}>
                 <Copy className="mr-1 h-3.5 w-3.5" /> Copy
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => persist.mutate()}
-                disabled={!output || persist.isPending}
-              >
-                <Save className="mr-1 h-3.5 w-3.5" /> Save
               </Button>
             </div>
           </div>
