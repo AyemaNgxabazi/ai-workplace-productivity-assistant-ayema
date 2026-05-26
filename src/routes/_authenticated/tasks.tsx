@@ -11,6 +11,8 @@ export const Route = createFileRoute("/_authenticated/tasks")({
       icon={ListChecks}
       inputLabel="What do you want to accomplish?"
       placeholder="E.g. Launch a new pricing page in 3 weeks: research, copy, design, dev, QA, launch."
+      buttonLabel="Generate Plan"
+      promptUsed="Create a workplace productivity plan with priorities, tasks and deadlines."
     />
   ),
 });

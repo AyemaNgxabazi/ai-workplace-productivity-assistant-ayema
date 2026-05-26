@@ -11,6 +11,8 @@ export const Route = createFileRoute("/_authenticated/research")({
       icon={Search}
       inputLabel="Research topic or question"
       placeholder="E.g. Compare project management methodologies for a 12-person product team."
+      buttonLabel="Generate Research"
+      promptUsed="Generate structured research with key points and suggested sources."
     />
   ),
 });
