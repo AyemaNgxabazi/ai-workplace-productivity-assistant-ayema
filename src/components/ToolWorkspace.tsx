@@ -20,6 +20,8 @@ export function ToolWorkspace({
   inputLabel,
   placeholder,
   showTone = false,
+  buttonLabel = "Generate",
+  promptUsed,
 }: {
   kind: Kind;
   title: string;
@@ -28,6 +30,8 @@ export function ToolWorkspace({
   inputLabel: string;
   placeholder: string;
   showTone?: boolean;
+  buttonLabel?: string;
+  promptUsed: string;
 }) {
   const [input, setInput] = useState("");
   const [tone, setTone] = useState("Professional");
@@ -94,8 +98,16 @@ export function ToolWorkspace({
             ) : (
               <Sparkles className="h-4 w-4" />
             )}
-            Generate
+            {buttonLabel}
           </Button>
+          <details className="group rounded-md border border-border/60 bg-muted/30 p-3 text-xs">
+            <summary className="cursor-pointer font-medium text-muted-foreground">
+              Prompt used
+            </summary>
+            <p className="mt-2 whitespace-pre-wrap text-muted-foreground/90">
+              {promptUsed}
+            </p>
+          </details>
         </Card>
 
         <Card className="flex flex-col gap-4 p-5">
