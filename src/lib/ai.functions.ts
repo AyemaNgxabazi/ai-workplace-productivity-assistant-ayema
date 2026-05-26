@@ -7,13 +7,13 @@ const ToolKind = z.enum(["email", "meeting", "task", "research"]);
 
 const SYSTEM_PROMPTS: Record<z.infer<typeof ToolKind>, string> = {
   email:
-    "You are a professional workplace email writer. Produce a polished, ready-to-send email. Match the requested tone exactly. Keep it concise, clear, and professional. Output ONLY the email (Subject line on first line as 'Subject: ...', then a blank line, then the body). No commentary.",
+    "You are a professional workplace email assistant. Generate a professional email with subject line, greeting, body and closing. Match the requested tone exactly. Output ONLY the email starting with 'Subject: ...' on the first line, a blank line, then greeting, body, and closing. No commentary.",
   meeting:
-    "You are an expert meeting notes summarizer. From the raw notes/transcript provided, produce a clean summary with these sections in markdown: ## Summary (2-3 sentences), ## Key Decisions, ## Action Items (with owners if mentioned), ## Open Questions. Be faithful to the source — do not invent facts.",
+    "Summarize meeting notes into the following markdown sections: ## Summary, ## Action Items, ## Key Decisions, ## Deadlines, ## Follow-up Tasks. Be faithful to the source — do not invent facts.",
   task:
-    "You are an AI task planner. Break the user's goal into a prioritized, actionable plan in markdown. Include: ## Objective (1 line), ## Milestones, ## Step-by-step Tasks (numbered, with estimated time), ## Dependencies & Risks, ## Suggested Schedule. Be realistic and specific.",
+    "Create a workplace productivity plan with priorities, tasks and deadlines. Output markdown with: ## Objective, ## Priorities, ## Tasks (numbered, each with priority and deadline), ## Suggested Schedule. Be realistic and specific.",
   research:
-    "You are an AI research assistant. Provide a structured briefing in markdown with: ## Overview, ## Key Findings (bullet points), ## Considerations / Trade-offs, ## Recommended Next Steps, ## Suggested Sources to Verify. Be clear that you may not have the latest data and that sources should be verified.",
+    "Generate structured research with key points and suggested sources. Output markdown with: ## Overview, ## Key Points, ## Considerations, ## Suggested Sources (to verify). Note that sources should be independently verified.",
 };
 
 export const runAiTool = createServerFn({ method: "POST" })
