@@ -49,7 +49,7 @@ export const Route = createFileRoute("/api/chat")({
             thread_id: threadId,
             user_id: userId,
             role: "user",
-            parts: lastUser.parts as unknown as object,
+            parts: lastUser.parts as never,
           });
           if (insErr) console.error("user msg insert", insErr);
 
@@ -82,7 +82,7 @@ export const Route = createFileRoute("/api/chat")({
                 thread_id: threadId,
                 user_id: userId,
                 role: "assistant",
-                parts: assistant.parts as unknown as object,
+                parts: assistant.parts as never,
               });
               if (aErr) console.error("assistant msg insert", aErr);
             }
