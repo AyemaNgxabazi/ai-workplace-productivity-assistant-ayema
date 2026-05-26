@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { Component, type ReactNode, useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,14 @@ const STORAGE_KEY = "pulse_chat_threads_v1";
 function loadThreads(): Thread[] {
   if (typeof window === "undefined") return [];
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (t): t is Thread =>
+        t && typeof t.id === "string" && Array.isArray(t.messages),
+    );
   } catch {
     return [];
   }
@@ -29,7 +36,44 @@ function loadThreads(): Thread[] {
 
 function saveThreads(threads: Thread[]) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(threads));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(threads));
+  } catch {
+    /* quota or disabled storage — ignore */
+  }
+}
+
+class ChatErrorBoundary extends Component<
+  { children: ReactNode; onReset: () => void },
+  { error: Error | null }
+> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  reset = () => {
+    this.setState({ error: null });
+    this.props.onReset();
+  };
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
+          <AlertTriangle className="h-8 w-8 text-amber-400" />
+          <div>
+            <h2 className="text-base font-semibold">Something went wrong</h2>
+            <p className="text-sm text-muted-foreground">
+              {this.state.error.message || "The chat hit an unexpected error."}
+            </p>
+          </div>
+          <Button onClick={this.reset} size="sm">
+            Start a new chat
+          </Button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 function ChatPage() {
@@ -39,8 +83,18 @@ function ChatPage() {
 
   useEffect(() => {
     const t = loadThreads();
-    setThreads(t);
-    if (t.length) setThreadId(t[0].id);
+    if (t.length) {
+      setThreads(t);
+      setThreadId(t[0].id);
+    } else {
+      const def: Thread = {
+        id: crypto.randomUUID(),
+        title: "New conversation",
+        messages: [],
+      };
+      setThreads([def]);
+      setThreadId(def.id);
+    }
     setHydrated(true);
   }, []);
 
@@ -61,22 +115,28 @@ function ChatPage() {
   };
 
   const removeThread = (id: string) => {
-    setThreads((prev) => prev.filter((t) => t.id !== id));
-    if (threadId === id) setThreadId(null);
+    setThreads((prev) => {
+      const next = prev.filter((t) => t.id !== id);
+      if (threadId === id) setThreadId(next[0]?.id ?? null);
+      return next;
+    });
   };
 
   const updateThread = (id: string, messages: UIMessage[]) => {
     setThreads((prev) =>
       prev.map((t) => {
         if (t.id !== id) return t;
-        const firstUser = messages.find((m) => m.role === "user");
+        const safeMessages = Array.isArray(messages) ? messages : [];
+        const firstUser = safeMessages.find((m) => m.role === "user");
         const firstText =
-          firstUser?.parts.find((p: any) => p.type === "text") as { text?: string } | undefined;
+          firstUser?.parts?.find((p: any) => p?.type === "text") as
+            | { text?: string }
+            | undefined;
         const title =
           t.title === "New conversation" && firstText?.text
             ? firstText.text.slice(0, 60)
             : t.title;
-        return { ...t, title, messages };
+        return { ...t, title, messages: safeMessages };
       }),
     );
   };
@@ -124,12 +184,13 @@ function ChatPage() {
 
       <div className="flex flex-1 flex-col">
         {current ? (
-          <ChatThread
-            key={current.id}
-            threadId={current.id}
-            initialMessages={current.messages}
-            onChange={(msgs) => updateThread(current.id, msgs)}
-          />
+          <ChatErrorBoundary key={current.id} onReset={newThread}>
+            <ChatThread
+              threadId={current.id}
+              initialMessages={current.messages ?? []}
+              onChange={(msgs) => updateThread(current.id, msgs)}
+            />
+          </ChatErrorBoundary>
         ) : (
           <EmptyState onNew={newThread} />
         )}
@@ -169,7 +230,7 @@ function ChatThread({
   const [input, setInput] = useState("");
   const { messages, sendMessage, status } = useChat({
     id: threadId,
-    messages: initialMessages as any,
+    messages: (Array.isArray(initialMessages) ? initialMessages : []) as any,
     transport: new DefaultChatTransport({ api: "/api/chat" }),
     onError: (e) => toast.error(e.message),
   });
