@@ -260,7 +260,7 @@ function ChatThread({
         <div className="mx-auto max-w-3xl space-y-4 p-6">
           {messages.length === 0 && (
             <div className="rounded-lg border border-border/60 bg-muted/30 p-4 text-sm text-muted-foreground">
-              Say hi — ask Pulse to draft, plan, summarize, or research anything.
+              Say hi — ask WorkSmart to draft, plan, summarize, or research anything.
             </div>
           )}
           {messages.map((m) => {
@@ -308,7 +308,7 @@ function ChatThread({
                 submit(e as any);
               }
             }}
-            placeholder="Message Pulse… (Shift+Enter for new line)"
+            placeholder="Message WorkSmart… (Shift+Enter for new line)"
             className="min-h-[52px] flex-1 resize-none bg-card/40"
             disabled={isPending}
           />

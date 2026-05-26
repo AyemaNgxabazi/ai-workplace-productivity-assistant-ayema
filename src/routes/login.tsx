@@ -62,7 +62,7 @@ function LoginPage() {
             <Sparkles className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Welcome to Pulse</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Welcome to WorkSmart</h1>
             <p className="text-sm text-muted-foreground">
               Your AI co-pilot for workplace productivity
             </p>
@@ -103,7 +103,7 @@ function LoginPage() {
           </Button>
         </Card>
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Pulse uses AI which may produce inaccurate output. Verify before sending.
+          WorkSmart uses AI which may produce inaccurate output. Verify before sending.
         </p>
       </div>
     </div>
