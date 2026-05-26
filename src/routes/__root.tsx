@@ -122,7 +122,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthSync />
       <Outlet />
-      <Toaster richColors theme="dark" />
+      <Toaster richColors theme="light" />
     </QueryClientProvider>
   );
 }
