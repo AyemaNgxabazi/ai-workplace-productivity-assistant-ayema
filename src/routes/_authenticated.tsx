@@ -24,6 +24,15 @@ function AuthLayout() {
           <main className="flex-1">
             <Outlet />
           </main>
+          <footer className="border-t border-border/60 bg-card/40 px-4 py-4 text-center text-xs text-muted-foreground">
+            <p className="mx-auto max-w-4xl leading-relaxed">
+              © 2026 AI Workplace Productivity Assistant
+              <span className="mx-2 hidden sm:inline">|</span>
+              <span className="block sm:inline">Developed by Ayema Ngxabazi</span>
+              <span className="mx-2 hidden sm:inline">|</span>
+              <span className="block sm:inline">All Rights Reserved</span>
+            </p>
+          </footer>
         </SidebarInset>
       </div>
     </SidebarProvider>
