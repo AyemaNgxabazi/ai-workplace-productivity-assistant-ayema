@@ -80,13 +80,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "WorkSmart AI Assistant drafts emails, summarizes meetings, plans tasks, and researches topics for busy professionals — with responsible AI guardrails.",
       },
-      { property: "og:title", content: "WorkSmart AI Assistant" },
+      { property: "og:title", content: "WorkSmart AI Assistant — AI Workplace Productivity" },
       {
         property: "og:description",
         content: "Automate your workplace tasks with responsible AI support.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "WorkSmart AI Assistant — AI Workplace Productivity" },
+      { name: "description", content: "WorkSmart AI Assistant automates professional tasks with AI-powered tools." },
+      { property: "og:description", content: "WorkSmart AI Assistant automates professional tasks with AI-powered tools." },
+      { name: "twitter:description", content: "WorkSmart AI Assistant automates professional tasks with AI-powered tools." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/06fc4e09-f42c-488f-90cb-2899335f47ef/id-preview-4c88a64b--27731137-0039-41c0-ac6e-e124fe546048.lovable.app-1779820032222.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/06fc4e09-f42c-488f-90cb-2899335f47ef/id-preview-4c88a64b--27731137-0039-41c0-ac6e-e124fe546048.lovable.app-1779820032222.png" },
     ],
     links: [
       {
